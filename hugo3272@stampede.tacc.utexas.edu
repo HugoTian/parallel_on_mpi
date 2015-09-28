@@ -28,8 +28,6 @@ main(int argc, char *argv[]) {
   MPI_Init(&argc, &argv);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  double start, end;
-  start = MPI_Wtime();
 
   if (argc != 4) {
     printf("usage: debug_perf test_set matrix_dimension_size\n");
@@ -144,7 +142,6 @@ main(int argc, char *argv[]) {
       i++;
       MPI_Barrier(MPI_COMM_WORLD);
     }
-  end = MPI_Wtime();
   if(rank ==0 ){
     if (debug_perf == 0) {
       // print each of the sub matrices
@@ -154,8 +151,6 @@ main(int argc, char *argv[]) {
       }
       printf("result matrix\n");
       print_matrix(result[n], matrix_dimension_size);
-      printf("\n");
-      printf("Runtime = %d\n", end-start);
     } else {
       double sum = 0.0;
 
