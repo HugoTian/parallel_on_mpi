@@ -1,17 +1,16 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "gen_matrix.h"
 
 int matrix_dimension_size = -1;
 static int num_arg_matrices;
-int called_p[8];     // a maximum of 8 arrays per test set
-
+int called_p[256];     // a maximum of 8 arrays per test set
 void double_call_check(int matrix_num) {
   static int first_p = 1;
 
   if (first_p) {
     int a;
-    for (a = 0; a < 8; ++a) called_p[a] = 0;
+    for (a = 0; a < 256; ++a) called_p[a] = 0;
     first_p = 0;
   }
 
@@ -72,7 +71,51 @@ double gen_one_element(int test_set,
 
     }
     break;
+   
+   case 2:
+    switch(matrix_num) {
+      case 0:  // generate from x and y
+      case 1:  // 
+        return ((double)(x + 1)/(y + 1));
     
+      case 2:  // unity C
+      
+      case 3:  // all unity
+      case 4:  
+      case 5:  
+      case 6:  
+      case 7:  
+      case 8:  
+      case 9:  
+      case 10:
+      case 11:  // all unity
+      case 12:  
+      case 13:  
+          return  ((double)(x + 2)/(y + 1));  
+      if (x == y) {
+  return(1.0);
+      } else {
+  return(0.0);
+      }
+   break;
+    
+    default:
+      printf("error, don't know test_set = %d, matrix_num = %d\n", test_set, matrix_num);
+      exit(1);
+    }
+    break;
+  
+  case 3:
+    switch(matrix_num) {
+    case 0:  // generate from x and y
+    case 1:  // 
+      return ((double)(x + 1)/(y + 1));
+    
+    default:
+      return ((double)(x + 1)/(y + 1));
+    }
+  break;
+
   }
 }
 
@@ -149,8 +192,12 @@ int init_gen_sub_matrix(int test_set) {
     num_arg_matrices = 3; break;
   case 1:
     num_arg_matrices = 8; break;
+  case 2:
+    num_arg_matrices = 13 ; break;
+  case 3:
+    num_arg_matrices = 256 ; break;
   default:
-    printf("we only have 3 tests, numbered 0, 1, and 2\n");
+    printf("we only have 4 tests, numbered 0, 1, 2 and 3\n");
     exit(1);
   }
   return(num_arg_matrices);

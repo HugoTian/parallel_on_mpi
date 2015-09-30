@@ -57,22 +57,30 @@ main(int argc, char *argv[]) {
       exit(1);
     }
   }  
-
+   
+  
   // perform matrix multiplies
   int n = 0;
 
   mm(result[0], r[0], r[1], matrix_dimension_size);
+
+  //====================debug ===================//
+  printf("result matrix\n");
+  print_matrix(result[0], matrix_dimension_size);
+
+  //====================debug====================//
   for (i = 2; i < num_arg_matrices; ++i) {
     mm(result[n ^ 0x1], result[n], r[i], matrix_dimension_size);
+   
     n = n ^ 0x1;
   }
 
   if (debug_perf == 0) {
     // print each of the sub matrices
-    for (i = 0; i < num_arg_matrices; ++i) {
-      printf("argument matrix %d\n", i);
-      print_matrix(r[i], matrix_dimension_size);
-    }
+    //for (i = 0; i < num_arg_matrices; ++i) {
+     // printf("argument matrix %d\n", i);
+     // print_matrix(r[i], matrix_dimension_size);
+   // }
     printf("result matrix\n");
     print_matrix(result[n], matrix_dimension_size);
   } else {

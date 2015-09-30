@@ -107,17 +107,18 @@ main(int argc, char *argv[]) {
     int n =0;
     i=2;
     while( i < num_arg_matrices) {
-      MPI_Bcast(&result[0][0], matrix_dimension_size*matrix_dimension_size, MPI_DOUBLE,0,MPI_COMM_WORLD);
+      MPI_Bcast(&result[n][0], matrix_dimension_size*matrix_dimension_size, MPI_DOUBLE,0,MPI_COMM_WORLD);
       MPI_Barrier(MPI_COMM_WORLD);
       int x,y,k;
       for(x = rank; x < matrix_dimension_size; x = x+size) //divide the task in multiple processes
       {
+          
           for(y = 0; y < matrix_dimension_size; y++)
           {
               double sum=0;
               for(k = 0; k < matrix_dimension_size; k++)
               {
-                 sum = sum + r[i][x*matrix_dimension_size+ k] * result[n][k*matrix_dimension_size+y];
+                 sum = sum + result[n][x*matrix_dimension_size+ k] * r[i][k*matrix_dimension_size+y];
               }
               result[n ^ 0x1][x*matrix_dimension_size + y] = sum;
           }
@@ -139,13 +140,14 @@ main(int argc, char *argv[]) {
              }
           }
       }
-      
+      MPI_Barrier(MPI_COMM_WORLD);
       n = n ^ 0x1;
       i++;
-      MPI_Barrier(MPI_COMM_WORLD);
+      
     }
-  end = MPI_Wtime();
+ 
   if(rank ==0 ){
+    end = MPI_Wtime();
     if (debug_perf == 0) {
       // print each of the sub matrices
       for (i = 0; i < num_arg_matrices; ++i) {
@@ -154,8 +156,8 @@ main(int argc, char *argv[]) {
       }
       printf("result matrix\n");
       print_matrix(result[n], matrix_dimension_size);
-      printf("\n");
-      printf("Runtime = %d\n", end-start);
+     // printf("\n");
+     // printf("Runtime = %f\n", end-start);
     } else {
       double sum = 0.0;
 

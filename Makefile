@@ -5,8 +5,12 @@ my_mm:  matrix_multi.cilk  gen_matrix.c my_malloc.c gen_matrix.h my_malloc.h
 
 mpi_mm: matrix_mpi.c gen_matrix.c my_malloc.c gen_matrix.h my_malloc.h
 	mpicc matrix_mpi.c gen_matrix.c my_malloc.c -o mult_mpi
+
+sec_mpi: mpi_matrix_2.c gen_matrix.c my_malloc.c gen_matrix.h my_malloc.h
+	mpicc mpi_matrix_2.c gen_matrix.c my_malloc.c -o mpi2
+	
 run_debug:
-	./test_mm 0 0 10
+	./test_mm 0 2 10
 
 run_performance:
 	./test_mm 1 0 10
