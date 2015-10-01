@@ -8,6 +8,9 @@ mpi_mm: matrix_mpi.c gen_matrix.c my_malloc.c gen_matrix.h my_malloc.h
 
 sec_mpi: mpi_matrix_2.c gen_matrix.c my_malloc.c gen_matrix.h my_malloc.h
 	mpicc mpi_matrix_2.c gen_matrix.c my_malloc.c -o mpi2
+
+third_mpi: mpi3.c gen_matrix.c my_malloc.c gen_matrix.h my_malloc.h
+	mpicc mpi3.c gen_matrix.c my_malloc.c -o mpi3
 	
 run_debug:
 	./test_mm 0 2 10

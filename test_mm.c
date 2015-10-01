@@ -65,8 +65,8 @@ main(int argc, char *argv[]) {
   mm(result[0], r[0], r[1], matrix_dimension_size);
 
   //====================debug ===================//
-  printf("result matrix\n");
-  print_matrix(result[0], matrix_dimension_size);
+  //printf("result matrix\n");
+  //print_matrix(result[0], matrix_dimension_size);
 
   //====================debug====================//
   for (i = 2; i < num_arg_matrices; ++i) {

@@ -1,6 +1,16 @@
 make test_mm
 make sec_mpi
-echo "Run test set $1 and matrix size $2 in $3 processes"
-./test_mm 0 $1 $2 > res1.txt
-mpirun -np $3 ./mpi2 0 $1 $2 > res2.txt
-diff res1.txt res2.txt
+
+for i in `seq 1 10`; do
+	for j in `seq 1 10`; do
+		./test_mm 0 3 $i > res1.txt
+		mpirun -np $j ./mpi2 0 3 $i > res2.txt
+		diff res1.txt res2.txt
+		if [ $? -eq 0 ]  ; then
+			echo "Run test set 3 and matrix size $i in $j processes success"
+		else
+			echo "Fail for size $i and process $j"
+		fi
+		
+	done
+done

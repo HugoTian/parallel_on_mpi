@@ -136,8 +136,14 @@ main(int argc, char *argv[]) {
 				MPI_Recv(&result[0][offset*matrix_dimension_size+0],rows*matrix_dimension_size, MPI_DOUBLE, source,mtype,MPI_COMM_WORLD,&status);
 			}
 		}
-		else
+		else{
+      if (gen_sub_matrix(0, test_set, 1, r[1], 0, matrix_dimension_size - 1, 1, 0, matrix_dimension_size - 1, 1, 1) == NULL) {
+           printf("inconsistency in gen_sub_matrix\n");
+           exit(1);
+      }
 			mm(result[0],r[0],r[1],matrix_dimension_size);
+    }
+    
   }
 
  //====================Slave task=========================================================================//
@@ -147,7 +153,11 @@ main(int argc, char *argv[]) {
 		MPI_Recv(&rows,1, MPI_INT, Master, mtype, MPI_COMM_WORLD, &status);
 	    MPI_Recv(&rp[0][0],rows*matrix_dimension_size,MPI_DOUBLE,Master,mtype,MPI_COMM_WORLD, &status);
 	   // MPI_Recv(&rp[1][0],matrix_dimension_size*matrix_dimension_size,MPI_DOUBLE, Master,mtype,MPI_COMM_WORLD,&status);
-
+        
+        //if (gen_sub_matrix(0, test_set, 0, rp[0], offset, offset + rows -1 , 1, 0, matrix_dimension_size - 1, 1, 1) == NULL) {
+     	//	 printf("inconsistency in gen_sub_matrix\n");
+     	//	 exit(1);
+    	// }
 	    if (gen_sub_matrix(0, test_set, 1, rp[1], 0, matrix_dimension_size - 1, 1, 0, matrix_dimension_size - 1, 1, 1) == NULL) {
      		 printf("inconsistency in gen_sub_matrix\n");
      		 exit(1);
@@ -170,10 +180,10 @@ main(int argc, char *argv[]) {
   }
   MPI_Barrier(MPI_COMM_WORLD);
   //====================USE loop to calculate result in cascade =======================================//
-  if(rank == 0){
-  printf("result matrix\n");
-  print_matrix(result[0], matrix_dimension_size);
-  }
+  //if(rank == 0){
+  //printf("result matrix\n");
+  //print_matrix(result[0], matrix_dimension_size);
+  //}
   int number = 2;
   int resN = 0; 
   
@@ -221,8 +231,13 @@ main(int argc, char *argv[]) {
 						MPI_Recv(&result[resN ^ 0x1][offset*matrix_dimension_size+0],rows*matrix_dimension_size, MPI_DOUBLE, source,mtype,MPI_COMM_WORLD,&status);
 					}
 				}
-				else
-					mm(result[resN ^ 0x1],result[resN],r[number],matrix_dimension_size);
+				else{
+          if (gen_sub_matrix(0, test_set, number, r[1], 0, matrix_dimension_size - 1, 1, 0, matrix_dimension_size - 1, 1, 1) == NULL) {
+                  printf("inconsistency in gen_sub_matrix\n");
+                  exit(1);
+          }
+					mm(result[resN ^ 0x1],result[resN],r[1],matrix_dimension_size);
+        }
   	    }
 
  		//====================Slave task=========================================================================//
