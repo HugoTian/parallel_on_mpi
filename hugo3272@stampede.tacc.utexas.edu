@@ -1,165 +1,204 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "gen_matrix.h"
-#include "my_malloc.h"
-#include "mpi.h"
 
+int matrix_dimension_size = -1;
+static int num_arg_matrices;
+int called_p[59];     // a maximum of 8 arrays per test set
+void double_call_check(int matrix_num) {
+  static int first_p = 1;
 
-void print_matrix(double *result, int dim_size) {
-  int x, y;
-  for (y = 0; y < dim_size; ++y) {
-    for (x = 0; x < dim_size; ++x) {
-      printf("%f ", result[y * dim_size + x]);
-    }
-    printf("\n");
+  if (first_p) {
+    int a;
+    for (a = 0; a < 59; ++a) called_p[a] = 0;
+    first_p = 0;
   }
-  printf("\n");
+
+  // double call check
+  if (called_p[matrix_num]) {
+    printf("tsk, tsk, you called me twice when you should have only called once!\n");
+    exit(1);
+  } else {
+    called_p[matrix_num] = 1;
+  }
 }
 
-main(int argc, char *argv[]) {
-  double **r;
-  double **result;
-  int i;
-  int num_arg_matrices;
-
-  int rank, size;
-  MPI_Status status;
-    
-  MPI_Init(&argc, &argv);
-  MPI_Comm_size(MPI_COMM_WORLD, &size);
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-  if (argc != 4) {
-    printf("usage: debug_perf test_set matrix_dimension_size\n");
-    exit(1);
-  }
-  int debug_perf = atoi(argv[1]);
-  int test_set = atoi(argv[2]);
-  matrix_dimension_size = atoi(argv[3]);
-  num_arg_matrices = init_gen_sub_matrix(test_set);
-  
-  // allocate arrays
-  r = (double **)my_malloc(sizeof(double *) * num_arg_matrices);
-  result = (double **)my_malloc(sizeof(double *) * 2);
-  result[0] = (double *)my_malloc(sizeof(double) * matrix_dimension_size * matrix_dimension_size);
-  result[1] = (double *)my_malloc(sizeof(double) * matrix_dimension_size * matrix_dimension_size);
-
-  // get sub matrices
-  for (i = 0; i < num_arg_matrices; ++i) {
-    r[i] = (double *)my_malloc(sizeof(double) * matrix_dimension_size * matrix_dimension_size);
-    if (gen_sub_matrix(0, test_set, i, r[i], 0, matrix_dimension_size - 1, 1, 0, matrix_dimension_size - 1, 1, 1) == NULL) {
-      printf("inconsistency in gen_sub_matrix\n");
+double gen_one_element(int test_set,
+		       int matrix_num,
+		       int x,
+		       int y) {
+  switch(test_set) {
+  case 0:
+    switch(matrix_num) {
+    case 0:  // generate from x and y
+    case 1:  // 
+      return ((double)(x + 1)/(y + 1));
+	  
+    case 2:  // unity C
+      if (x == y) {
+	return(1.0);
+      } else {
+	return(0.0);
+      }
+      break;
+	  
+    default:
+      printf("error, don't know test_set = %d, matrix_num = %d\n", test_set, matrix_num);
       exit(1);
     }
-  }  
+    break;
 
-  // start MPI implementation
-  
-  
-  // perform matrix multiplies of r[0] and r[1]
-   MPI_Barrier(MPI_COMM_WORLD);
-   int x,y,k;
-   for(x = rank; x < matrix_dimension_size; x = x +size) //divide the task in multiple processes
-    {
-        for(y = 0; y < matrix_dimension_size; y++)
-        {
-            double sum=0;
-            for(k = 0; k < matrix_dimension_size; k++)
-            {
-                sum = sum + r[0][x*matrix_dimension_size+ k] * r[1][k*matrix_dimension_size+y];
-            }
-            result[0][x*matrix_dimension_size + y] = sum;
-        }
-    }
-    
-    if(rank != 0)
-    {
-        for(x = rank; x < matrix_dimension_size; x = x+size)
-        MPI_Send(&result[0][x*matrix_dimension_size + 0], matrix_dimension_size, MPI_DOUBLE, 0, 10+x, MPI_COMM_WORLD);//send calculated rows to process with rank 0
-    }
-    
-    if(rank == 0)
-    {
-        for(y = 1; y < size; y++)
-        {
-            for(x = y; x < matrix_dimension_size; x = x+size)
-            {
-                MPI_Recv(&result[0][x*matrix_dimension_size+0], matrix_dimension_size, MPI_DOUBLE, y, 10+x, MPI_COMM_WORLD, &status);//receive calculated rows from respective process
-            }
-        }
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-    /*
-    int n = 0;
-    if (debug_perf == 0) {
-      // print each of the sub matrices
-     for (i = 0; i < num_arg_matrices; ++i) {
-        printf("argument matrix %d\n", i);
-       print_matrix(r[i], matrix_dimension_size);
+  case 1:
+    switch(matrix_num) {
+    case 0:  // all unity
+    case 1:  
+    case 2:  
+    case 3:  
+    case 4:  
+    case 5:  
+    case 6:  
+    case 7:  
+      if (x == y) {
+	return(1.0);
+      } else {
+	return(0.0);
       }
-      printf("result matrix\n");
-      print_matrix(result[n], matrix_dimension_size);
-    } 
-    */
-    //MPI_Bcast(&result[0][0], matrix_dimension_size*matrix_dimension_size, MPI_DOUBLE,0,MPI_COMM_WORLD);
-    int n =0;
-    i=2;
-    while( i < num_arg_matrices) {
-      MPI_Bcast(&result[0][0], matrix_dimension_size*matrix_dimension_size, MPI_DOUBLE,0,MPI_COMM_WORLD);
-      MPI_Barrier(MPI_COMM_WORLD);
-      int x,y,k;
-      for(x = rank; x < matrix_dimension_size; x = x+size) //divide the task in multiple processes
-      {
-          for(y = 0; y < matrix_dimension_size; y++)
-          {
-              double sum=0;
-              for(k = 0; k < matrix_dimension_size; k++)
-              {
-                 sum = sum + r[i][x*matrix_dimension_size+ k] * result[n][k*matrix_dimension_size+y];
-              }
-              result[n ^ 0x1][x*matrix_dimension_size + y] = sum;
-          }
-      }
-    
-      if(rank != 0)
-      {
-          for(x = rank; x < matrix_dimension_size; x = x+size)
-          MPI_Send(&result[n ^ 0x1][x*matrix_dimension_size + 0], matrix_dimension_size, MPI_DOUBLE, 0, 10+x, MPI_COMM_WORLD);//send calculated rows to process with rank 0
-      }
+      break;
       
-      if(rank == 0)
-      {
-         for(y = 1; y < size; y++)
-          {
-              for(x = y; x < matrix_dimension_size; x = x+size)
-              {
-                  MPI_Recv(&result[n ^ 0x1][x*matrix_dimension_size+0], matrix_dimension_size, MPI_DOUBLE, y, 10+x, MPI_COMM_WORLD, &status);//receive calculated rows from respective process
-             }
-          }
-      }
-      
-      n = n ^ 0x1;
-      i++;
-      MPI_Barrier(MPI_COMM_WORLD);
-    }
-  if(rank ==0 ){
-    if (debug_perf == 0) {
-      // print each of the sub matrices
-      for (i = 0; i < num_arg_matrices; ++i) {
-        printf("argument matrix %d\n", i);
-        print_matrix(r[i], matrix_dimension_size);
-      }
-      printf("result matrix\n");
-      print_matrix(result[n], matrix_dimension_size);
-    } else {
-      double sum = 0.0;
+    default:
+      printf("error, don't know test_set = %d, matrix_num = %d\n", test_set, matrix_num);
+      exit(1);
 
-      for (i = 0; i < matrix_dimension_size * matrix_dimension_size; ++i) {
-        sum += result[n][i];
-      }
-      printf("%f\n", sum);
     }
+    break;
+   
+   case 2:
+    switch(matrix_num) {
+      case 0:  // generate from x and y
+      case 1:  // 
+        return ((double)(x + 1)/(y + 1));
+    
+      case 2:  // unity C
+      
+      case 3:  // all unity
+      case 4:  
+      case 5:  
+      case 6:  
+      case 7:  
+      case 8:  
+      case 9:  
+      case 10:
+      case 11:  // all unity
+      case 12:  
+      case 13:  
+          return  ((double)(x + 2)/(y + 1));  
+      if (x == y) {
+  return(1.0);
+      } else {
+  return(0.0);
+      }
+   break;
+    
+    default:
+      printf("error, don't know test_set = %d, matrix_num = %d\n", test_set, matrix_num);
+      exit(1);
+    }
+    break;
+  
+  case 3:
+    switch(matrix_num) {
+    case 0:  // generate from x and y
+    case 1:  // 
+      return ((double)(x + 1)/(y + 1));
+    
+    default:
+      return ((double)(x + 1)/(y + 1));
+    }
+  break;
+
   }
-  MPI_Finalize();
 }
 
+
+double *gen_sub_matrix(int pid,        // the process id of the job calling.  This should be a number between 0 and num processes - 1
+		       int test_set,   // the test set command line argument
+		       int matrix_num, // the matrix number [0, num_arg_matrices - 1] 
+		       double *result, // a pointer to storage for the flattened array of the requested sub matrix
+		       int x_lo,       // the starting x value of the requested sub matrix
+		       int x_hi,       // the ending x value of the requested sub matrix
+		       int x_stride,   // the stride in the x dimension
+		       int y_lo,       // the starting y value of the requested sub matrix
+		       int y_hi,       // the ending y value of the requested sub matrix
+		       int y_stride,   // the stride in the y dimension
+		       int row_major_p)// whether the returned sub matrix is in row_major or column_major order
+{
+  int i = 0;
+  int y;
+  int x;
+
+  double_call_check(matrix_num);
+
+  // bounds check
+  if ((matrix_dimension_size - 1) < x_hi) {
+    printf("error: x_hi is too large\n");
+    exit(1);
+  }
+
+  if ((matrix_dimension_size - 1) < y_hi) {
+    printf("error: y_hi is too large\n");
+    exit(1);
+  }
+
+  if (row_major_p) {
+    for (y = y_lo; y <= y_hi; y += y_stride) {
+      for (x = x_lo; x <= x_hi; x += x_stride) {
+	result[i++] = gen_one_element(test_set, matrix_num, x, y);
+      }
+    }
+  } else { // column major
+    for (x = x_lo; x <= x_hi; x += x_stride) {
+      for (y = y_lo; y <= y_hi; y += y_stride) {
+	result[i++] = gen_one_element(test_set, matrix_num, x, y);
+      }
+    }
+  }
+
+  return(result);
+}
+
+double *gen_sub_matrix_array_spec(int pid, int test_set, int matrix_num, double *result, pair_t *pairs) {
+  int i = 0;
+
+  double_call_check(matrix_num);
+
+  while (pairs[i].x >= 0) {
+    switch(matrix_num) {
+    case 0:
+    case 1:
+    case 2:
+      result[i++] = ((pairs[i].x == pairs[i].y) ? 1.0 : 0.0);
+      break;
+    default:
+      return(NULL);
+    }
+  }
+}
+
+// returns num_arrays
+int init_gen_sub_matrix(int test_set) {
+  // this makes it more convenient to change the number of arrays
+  switch(test_set) {
+  case 0:
+    num_arg_matrices = 3; break;
+  case 1:
+    num_arg_matrices = 8; break;
+  case 2:
+    num_arg_matrices = 13 ; break;
+  case 3:
+    num_arg_matrices = 59 ; break;
+  default:
+    printf("we only have 4 tests, numbered 0, 1, 2 and 3\n");
+    exit(1);
+  }
+  return(num_arg_matrices);
+}
