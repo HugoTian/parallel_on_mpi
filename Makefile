@@ -1,11 +1,8 @@
-test_mm: test_mm.c gen_matrix.c my_malloc.c gen_matrix.h my_malloc.h
-	gcc -g -DDEBUG test_mm.c gen_matrix.c my_malloc.c -o test_mm
-my_mm:  matrix_mult.cilk  gen_matrix.c my_malloc.c gen_matrix.h my_malloc.h
-	cilkc -D_XOPEN_SOURCE=600 -D_POSIX_C_SOURCE=200809L  gen_matrix.c my_malloc.c matrix_mult.cilk -o mult
+test_mm: mpi.c gen_matrix.c my_malloc.c gen_matrix.h my_malloc.h
+	mpicc -O3 -o mpi  mpi.c gen_matrix.c my_malloc.c
 
-mpi: mpi3.c gen_matrix.c my_malloc.c gen_matrix.h my_malloc.h
-	mpicc -O3 -o mpi3  mpi3.c gen_matrix.c my_malloc.c
-
+cilk_mm: cilk.c gen_matrix.c my_malloc.c  gen_matrix.h my_malloc.h
+	icc -O3 -o cilk_mm cilk.c  gen_matrix.c my_malloc.c
 run_debug:
 	./test_mm 0 2 10
 
