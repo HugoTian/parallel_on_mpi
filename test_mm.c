@@ -77,14 +77,11 @@ main(int argc, char *argv[]) {
 
   if (debug_perf == 0) {
     // print each of the sub matrices
-    //for (i = 0; i < num_arg_matrices; ++i) {
-     // printf("argument matrix %d\n", i);
-     // print_matrix(r[i], matrix_dimension_size);
-   // }
-    int pp;
-    for (pp=0;pp<matrix_dimension_size*matrix_dimension_size;pp++){
-        result[n][pp] = (long) result[n][pp];
+    for (i = 0; i < num_arg_matrices; ++i) {
+      printf("argument matrix %d\n", i);
+      print_matrix(r[i], matrix_dimension_size);
     }
+   
     printf("result matrix\n");
     print_matrix(result[n], matrix_dimension_size);
   } else {

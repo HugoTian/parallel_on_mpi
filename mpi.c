@@ -70,6 +70,8 @@ main(int argc, char *argv[]) {
   int test_set = atoi(argv[2]);
   matrix_dimension_size = atoi(argv[3]);
   num_arg_matrices = init_gen_sub_matrix(test_set);
+
+  info =(int *)my_malloc(sizeof(int) * size);
   
   if(num_arg_matrices == 1 && rank==0 ){
        result = (double *)my_malloc(sizeof(double) * matrix_dimension_size * matrix_dimension_size);
@@ -309,7 +311,7 @@ main(int argc, char *argv[]) {
            
             
             //===========================get the info of all process ===================================//
-            info =(int *)my_malloc(sizeof(int) * size);
+           
             int just;
             for(just = 0; just < size ; just++){
               info[just] = 0;
@@ -614,10 +616,10 @@ main(int argc, char *argv[]) {
   if(rank == 0){
       if (debug_perf == 0) {
         // print each of the sub matrices
-        for (i = 0; i < num_arg_matrices; ++i) {
-            printf("argument matrix %d\n", i);
-              print_matrix(r[i], matrix_dimension_size);
-        }
+        //for (i = 0; i < num_arg_matrices; ++i) {
+        //    printf("argument matrix %d\n", i);
+        //      print_matrix(r[i], matrix_dimension_size);
+        //}
         printf("result matrix\n");
         
         print_matrix(result, matrix_dimension_size);
