@@ -579,7 +579,7 @@ main(int argc, char *argv[]) {
 
 
   end = MPI_Wtime();
-  MPI_Finalize();
+
 
    //=======================See result==================================================================//
   if(rank == 0){
@@ -599,16 +599,20 @@ main(int argc, char *argv[]) {
 
         printf("The running time %f\n", end - start );
       } 
-      /*else {
+      else {
         double sum = 0.0;
 
         for (i = 0; i < matrix_dimension_size * matrix_dimension_size; ++i) {
-            sum += result[resN][i];
+            sum += result[i];
         }
         printf("%f\n", sum);
       }
-      */
+      
   }
-  
+  my_free(result);
+  my_free(r[0]);
+  my_free(r[1]);
+  my_free(info);
+  MPI_Finalize();
 
 }
