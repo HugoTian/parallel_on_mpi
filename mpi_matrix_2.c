@@ -273,6 +273,8 @@ main(int argc, char *argv[]) {
   }
 
 
+  end = MPI_Wtime();
+  MPI_Finalize();
 
   //=======================See result==================================================================//
   if(rank == 0){
@@ -284,6 +286,7 @@ main(int argc, char *argv[]) {
     	 	//}
     	 	printf("result matrix\n");
     	 	print_matrix(result[resN], matrix_dimension_size);
+        printf("The program Running time for mpi2 is %f\n", end -start );
    		} else {
     		double sum = 0.0;
 
@@ -295,5 +298,4 @@ main(int argc, char *argv[]) {
   }
   
 
-  MPI_Finalize();
 }
