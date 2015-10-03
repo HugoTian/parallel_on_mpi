@@ -111,6 +111,33 @@ int main(int argc, char *argv[]) {
   result = (double **)my_malloc(sizeof(double *) * num_arg_matrices/2);
   back_up = (double **)my_malloc(sizeof(double *) * num_arg_matrices/2);
 
+  if(num_arg_matrices ==1){
+         result[0] = (double *)my_malloc(sizeof(double) * matrix_dimension_size * matrix_dimension_size);
+          if (gen_sub_matrix(0, test_set, 0, result[0], 0, matrix_dimension_size - 1, 1, 0, matrix_dimension_size - 1, 1, 1) == NULL) {
+              printf("inconsistency in gen_sub_matrix\n");
+              exit(1);
+          }
+          if (debug_perf == 0) {
+            // print each of the sub matrices
+            printf("argument matrix %d\n", i);
+            print_matrix(result[0], matrix_dimension_size);
+          }
+    
+         printf("result matrix\n");
+         print_matrix(result[0], matrix_dimension_size);
+
+         } else {
+            sum = 0.0;
+
+            for (i = 0; i < matrix_dimension_size * matrix_dimension_size; ++i) {
+              sum += result[0][i];
+            }
+            printf("%f\n", sum);
+          }
+    my_free(result[0]);
+    return 0;
+  }
+
   for(qq  = 0 ; qq < num_arg_matrices/2; qq ++){
        result[qq] = (double *)my_malloc(sizeof(double) * matrix_dimension_size * matrix_dimension_size);
        back_up[qq] = (double *)my_malloc(sizeof(double) * matrix_dimension_size * matrix_dimension_size);
@@ -160,18 +187,18 @@ int main(int argc, char *argv[]) {
   t = clock()-t;
   if (debug_perf == 0) {
     // print each of the sub matrices
-    /*
+    
     for (i = 0; i < num_arg_matrices; ++i) {
       printf("argument matrix %d\n", i);
       print_matrix(r[i], matrix_dimension_size);
     }
-    */
+    
     printf("result matrix\n");
     print_matrix(result[0], matrix_dimension_size);
    
-    time_exc =  ((double) t ) / CLOCKS_PER_SEC ;
+    //time_exc =  ((double) t ) / CLOCKS_PER_SEC ;
 
-    printf("running time of cilk %f \n" , time_exc);
+   // printf("running time of cilk %f \n" , time_exc);
   } else {
     sum = 0.0;
 
@@ -179,6 +206,15 @@ int main(int argc, char *argv[]) {
       sum += result[0][i];
     }
     printf("%f\n", sum);
+  }
+
+  int ff =0;
+  for(ff= 0 ; ff < num_arg_matrices ;mm++){
+      my_free(r[ff]);
+      if(ff%2 == 0){
+        my_free(result[ff]);
+        my_free(back_up[ff]);
+      }
   }
 }
 
