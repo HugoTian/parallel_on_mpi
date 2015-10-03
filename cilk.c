@@ -12,7 +12,7 @@ void copyMatrix(double* result, double * a, int size){
     }
 }
 
-cilk void multMatrices( double* A, double* B, double* C, int size, int length, int ctr)
+void multMatrices( double* A, double* B, double* C, int size, int length, int ctr)
 {
   int j, h, k ;
   if(length == 1) 
@@ -41,7 +41,7 @@ cilk void multMatrices( double* A, double* B, double* C, int size, int length, i
   }
 }
 
-cilk void mm(double * C, double * A, double *B, int n){
+void mm(double * C, double * A, double *B, int n){
   int  split, i, ctr = 0, nchunk, chunk;
   for(split= n/2+1; (split <= n ) && (n % split != 0); split++){
   }
@@ -83,7 +83,7 @@ void print_matrix(double *result, int dim_size) {
   printf("\n");
 }
 
-cilk int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
  // clock_t t = clock();
   double **r;
   double **result;
