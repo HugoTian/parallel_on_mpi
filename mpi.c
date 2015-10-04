@@ -625,7 +625,7 @@ main(int argc, char *argv[]) {
         print_matrix(result, matrix_dimension_size);
 
 
-        //printf("The running time %f\n", end - start );
+        printf("The running time %f\n", end - start );
       } 
       else {
         double sum = 0.0;

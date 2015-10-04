@@ -127,7 +127,7 @@ cilk int main(int argc, char *argv[]) {
   
   // perform matrix multiplies
   for(k=0;k<num_arg_matrices/2;k++){
-          spawn mm(result[k], r[k], r[k+1], matrix_dimension_size);
+          spawn mm(result[k], r[2*k], r[2*k+1], matrix_dimension_size);
   }
   sync;
   
@@ -139,24 +139,25 @@ cilk int main(int argc, char *argv[]) {
   // calculate from buttom up
   
   tmp = num_arg_matrices/2;
-  
   gap = 1 ;
   while(tmp!=1){
     int p;
     for(p=0;p<tmp/2;p++){
-          copyMatrix(back_up[p], result[p], matrix_dimension_size);
-          spawn mm(result[p], back_up[p], result[p+gap] , matrix_dimension_size);
+          printf("I try to get result of %d and %d \n", p*2, p*2+gap);
+          copyMatrix(back_up[p*2], result[p*2], matrix_dimension_size);
+          spawn mm(result[p*2], back_up[p*2], result[2*p+gap] , matrix_dimension_size);
+         // sync;
     }
     sync;
+
     if(tmp%2){
-        copyMatrix(back_up[tmp/2-1], result[tmp/2-1], matrix_dimension_size);
-        spawn mm(result[tmp/2-1], back_up[tmp/2-1], result[tmp-1] , matrix_dimension_size);
-        sync;
+        tmp -- ;
     }
-    tmp = tmp/2;
+    else{
+        tmp = tmp /2;
+    }
     gap = gap*2;
   }
-
   t = clock()-t;
   if (debug_perf == 0) {
     // print each of the sub matrices

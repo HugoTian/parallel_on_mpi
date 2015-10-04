@@ -40,8 +40,7 @@ void multMatrices( double* A, double* B, double* C, int size, int length, int ct
     cilk_sync;
   }
 }
-
-void mm(double * C, double * A, double *B, int n){
+ void mm(double * C, double * A, double *B, int n){
   int  split, i, ctr = 0, nchunk, chunk;
   for(split= n/2+1; (split <= n ) && (n % split != 0); split++){
   }
@@ -111,33 +110,6 @@ int main(int argc, char *argv[]) {
   result = (double **)my_malloc(sizeof(double *) * num_arg_matrices/2);
   back_up = (double **)my_malloc(sizeof(double *) * num_arg_matrices/2);
 
-  if(num_arg_matrices ==1){
-         result[0] = (double *)my_malloc(sizeof(double) * matrix_dimension_size * matrix_dimension_size);
-          if (gen_sub_matrix(0, test_set, 0, result[0], 0, matrix_dimension_size - 1, 1, 0, matrix_dimension_size - 1, 1, 1) == NULL) {
-              printf("inconsistency in gen_sub_matrix\n");
-              exit(1);
-          }
-          if (debug_perf == 0) {
-            // print each of the sub matrices
-            printf("argument matrix %d\n", i);
-            print_matrix(result[0], matrix_dimension_size);
-          }
-    
-         printf("result matrix\n");
-         print_matrix(result[0], matrix_dimension_size);
-
-         } else {
-            sum = 0.0;
-
-            for (i = 0; i < matrix_dimension_size * matrix_dimension_size; ++i) {
-              sum += result[0][i];
-            }
-            printf("%f\n", sum);
-          }
-    my_free(result[0]);
-    return 0;
-  }
-
   for(qq  = 0 ; qq < num_arg_matrices/2; qq ++){
        result[qq] = (double *)my_malloc(sizeof(double) * matrix_dimension_size * matrix_dimension_size);
        back_up[qq] = (double *)my_malloc(sizeof(double) * matrix_dimension_size * matrix_dimension_size);
@@ -153,10 +125,10 @@ int main(int argc, char *argv[]) {
 
   
   // perform matrix multiplies
-  for(k=0;k<num_arg_matrices/2;k++){
-          cilk_spawn mm(result[k], r[k], r[k+1], matrix_dimension_size);
+  cilk_for(k=0;k<num_arg_matrices/2;k++){
+           mm(result[k], r[2*k], r[2*k+1], matrix_dimension_size);
   }
-  cilk_sync;
+  
   
   if(num_arg_matrices%2){
      copyMatrix(back_up[num_arg_matrices/2-1], result[num_arg_matrices/2-1],matrix_dimension_size);
@@ -166,39 +138,40 @@ int main(int argc, char *argv[]) {
   // calculate from buttom up
   
   tmp = num_arg_matrices/2;
-  
   gap = 1 ;
   while(tmp!=1){
     int p;
-    for(p=0;p<tmp/2;p++){
-          copyMatrix(back_up[p], result[p], matrix_dimension_size);
-          cilk_spawn mm(result[p], back_up[p], result[p+gap] , matrix_dimension_size);
+    cilk_for(p=0;p<tmp/2;p++){
+         // printf("I try to get result of %d and %d \n", p*2, p*2+gap);
+          copyMatrix(back_up[p*2], result[p*2], matrix_dimension_size);
+           mm(result[p*2], back_up[p*2], result[2*p+gap] , matrix_dimension_size);
+         // sync;
     }
-    cilk_sync;
+    
+
     if(tmp%2){
-        copyMatrix(back_up[tmp/2-1], result[tmp/2-1], matrix_dimension_size);
-        cilk_spawn mm(result[tmp/2-1], back_up[tmp/2-1], result[tmp-1] , matrix_dimension_size);
-        cilk_sync;
+        tmp -- ;
     }
-    tmp = tmp/2;
+    else{
+        tmp = tmp /2;
+    }
     gap = gap*2;
   }
-
   t = clock()-t;
   if (debug_perf == 0) {
     // print each of the sub matrices
-    
+    /*
     for (i = 0; i < num_arg_matrices; ++i) {
       printf("argument matrix %d\n", i);
       print_matrix(r[i], matrix_dimension_size);
     }
-    
+    */
     printf("result matrix\n");
     print_matrix(result[0], matrix_dimension_size);
    
-    //time_exc =  ((double) t ) / CLOCKS_PER_SEC ;
+    time_exc =  ((double) t ) / CLOCKS_PER_SEC ;
 
-   // printf("running time of cilk %f \n" , time_exc);
+    printf("running time of cilk %f \n" , time_exc);
   } else {
     sum = 0.0;
 
@@ -208,13 +181,13 @@ int main(int argc, char *argv[]) {
     printf("%f\n", sum);
   }
 
-  int ff =0;
-  for(ff= 0 ; ff < num_arg_matrices ;mm++){
-      my_free(r[ff]);
-      if(ff%2 == 0){
-        my_free(result[ff]);
-        my_free(back_up[ff]);
-      }
+  for(i = 0 ; i < num_arg_matrices; i++){
+      my_free(r[i]);
+  }
+
+  for(i = 0 ; i < num_arg_matrices/2;i++){
+      my_free(result[i]);
+      my_free(back_up[i]);
   }
 }
 

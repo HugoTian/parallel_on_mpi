@@ -4,13 +4,13 @@
 
 int matrix_dimension_size = -1;
 static int num_arg_matrices;
-int called_p[59];     // a maximum of 8 arrays per test set
+int called_p[29];     // a maximum of 8 arrays per test set
 void double_call_check(int matrix_num) {
   static int first_p = 1;
 
   if (first_p) {
     int a;
-    for (a = 0; a < 59; ++a) called_p[a] = 0;
+    for (a = 0; a < 29; ++a) called_p[a] = 0;
     first_p = 0;
   }
 
@@ -91,6 +91,8 @@ double gen_one_element(int test_set,
       case 11:  // all unity
       case 12:  
       case 13:  
+      case 14:
+      case 15:
           return  ((double)(x + 2)/(y + 1));  
       if (x == y) {
   return(1.0);
@@ -193,9 +195,9 @@ int init_gen_sub_matrix(int test_set) {
   case 1:
     num_arg_matrices = 8; break;
   case 2:
-    num_arg_matrices = 13 ; break;
+    num_arg_matrices = 16 ; break;
   case 3:
-    num_arg_matrices = 59 ; break;
+    num_arg_matrices = 29 ; break;
   default:
     printf("we only have 4 tests, numbered 0, 1, 2 and 3\n");
     exit(1);
